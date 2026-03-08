@@ -55,27 +55,66 @@ body {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   gap: 10px;
+}
+
+.app-brand {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.app-logo {
+  width: 100px;
+  border-radius: 50%;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 56px;
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-subtitle {
+  margin: 4px 0 0 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
 }
 
 .app-shell-view-toggle {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
 }
 
 .app-shell-view-toggle-button {
   border: 1px solid var(--color-panel-border);
-  color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-panel-bg) 92%, white 8%);
-  border-radius: 8px;
+  color: var(--color-text-muted);
+  background: var(--color-panel-bg-alt);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  padding: 8px 10px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+  min-height: 0;
+  width: auto;
+}
+
+.app-shell-view-toggle-button:hover {
+  background: var(--color-panel-bg);
+  color: var(--color-text-primary);
 }
 
 .app-shell-view-toggle-button--active {
-  background: color-mix(in srgb, var(--color-status-info) 24%, var(--color-panel-bg) 76%);
-  border-color: var(--color-status-info);
+  background: var(--color-accent);
+  color: var(--color-panel-bg);
+  border-color: var(--color-accent);
+  font-weight: 600;
 }
 
 .app-shell-workspace {
