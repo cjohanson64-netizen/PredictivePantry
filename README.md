@@ -1,17 +1,121 @@
-# Predictive Pantry — Architecture Specification
+# Predictive Pantry
 
-This document is the **locked architectural specification** for the Predictive Pantry application.
-All development decisions should follow the structures and rules defined here.
+Predictive Pantry is a **domain-driven web application** that models a real-world pantry and derives insights about inventory, expiration, and replenishment over time.
 
-This spec exists so that automated tools (Codex, Claude, etc.) and human contributors always have a **single source of truth** for the system architecture.
+The system demonstrates a **structure-first architecture** built around a custom DSL called **TryAngleTree (TAT)**. Application semantics are defined structurally, while UI layers simply render runtime state.
+
+The goal of the project is to explore how **structural domain modeling can simplify application development and AI-assisted programming**.
 
 ---
 
-# Architecture Overview
+# Live System Capabilities
 
-Predictive Pantry models a **real-world pantry** and derives insights from its contents over time.
+Predictive Pantry currently supports:
 
-The system follows a domain-first architecture where **Pantry is the root domain**.
+### Inventory Management
+
+* Add items to pantry
+* Track grouped inventory counts
+* Adjust stock levels
+* Set low-stock thresholds
+* Define item categories
+* Define shelf life
+
+### Intelligent Analysis
+
+* Detect low stock
+* Detect expiration risk
+* Track expiration automatically based on shelf life
+* Generate inventory recommendations
+
+### Recommendation Engine
+
+The system can recommend actions such as:
+
+* **Check item** (expired items)
+* **Use soon** (approaching expiration)
+* **Restock soon** (low stock)
+
+Recommendations are ranked and surfaced to the user.
+
+### Shopping List Generation
+
+The app can generate a shopping list derived from:
+
+```
+inventory state
+→ analysis
+→ recommendation ranking
+→ shopping list
+```
+
+### Persistence
+
+Runtime state is persisted in browser storage so inventory survives page reloads.
+
+### Scenario Testing
+
+The project includes a **scenario harness** that allows deterministic testing of pantry logic and edge cases.
+
+---
+
+# Architectural Philosophy
+
+Predictive Pantry follows a strict architectural hierarchy:
+
+```
+TAT → Structure and semantics
+JSX → Rendering of runtime state
+CSS → Visual styling only
+```
+
+This ensures that:
+
+* **Application behavior lives in the domain layer**
+* **UI never becomes the source of truth**
+* **Structure drives implementation**
+
+This design also makes the project highly compatible with **AI-assisted development tools**.
+
+---
+
+# What is TryAngleTree (TAT)?
+
+TryAngleTree is a **structural DSL for modeling application behavior**.
+
+Instead of defining behavior inside UI code, TAT describes:
+
+* domain structure
+* allowed mutations
+* execution programs
+* handler contracts
+
+A TAT program is executed by the runtime and produces:
+
+```
+state updates
+events
+outputs
+warnings
+errors
+```
+
+UI components simply render this runtime state.
+
+This separation enables:
+
+* deterministic program execution
+* scenario testing
+* clear domain modeling
+* reduced UI complexity
+
+---
+
+# Domain Model
+
+Predictive Pantry models a **real-world pantry system**.
+
+The top-level domain is **Pantry**.
 
 ```
 Pantry
@@ -20,19 +124,23 @@ Pantry
  │      Identity of a thing (Eggs, Milk, Spinach)
  │
  ├── Inventory
- │      Grouped analytical view of what currently exists in the pantry
+ │      Aggregated view of pantry contents
  │
  ├── Inventory History
- │      Aggregated record of how inventory changes over time
+ │      Time-based record of inventory changes
  │
  ├── Item Analysis
- │      Derived insights (low stock, expiration warnings, usage patterns)
+ │      Derived insights about pantry state
  │
  └── Inventory Panel
         Interaction and visualization layer
 ```
 
-### Domain Flow
+---
+
+# Domain Flow
+
+The application models a real pantry through layered projections:
 
 ```
 Real Pantry
@@ -43,80 +151,12 @@ Inventory History (time dimension)
      ↓
 Item Analysis (derived insights)
      ↓
-Inventory Panel (user interaction)
+Recommendations
+     ↓
+Shopping List
 ```
 
-### Future Domain Expansion
-
-Recipes are **not part of Pantry**, but they depend on Pantry data.
-
-```
-Pantry ──────► Recipes
-       informs suggestions
-```
-
-Recipes may reference:
-
-* Items
-* Pantry inventory state
-* Analysis insights
-
-Example future features:
-
-```
-Recipes
- ├── Recipe Library
- ├── Recipe Builder
- └── Recipe Suggestions
-```
-
-### Architectural Philosophy
-
-The application follows a strict structural hierarchy:
-
-```
-TAT → Structure and semantics
-JSX → Rendering of runtime state
-CSS → Visual styling only
-```
-
-This ensures the **domain model and logic remain independent of the UI layer**.
-
----
-
-# Core Doctrine
-
-The application follows a strict architectural hierarchy:
-
-**TAT first → Render second → Beautify third**
-
-Meaning:
-
-* **TAT (TryAngleTree)** defines the structure and semantics of the application.
-* **JSX** is responsible only for rendering the runtime state.
-* **CSS** is responsible only for aesthetics.
-
-JSX must never become the source of truth for application behavior.
-
----
-
-# Domain Model
-
-## Pantry (Root Domain)
-
-The **Pantry** is the top-level domain of the application.
-
-The app models and analyzes the state of a real-world pantry.
-
-The pantry contains:
-
-* Items (identities of things)
-* Inventory (summarized current pantry state)
-* Inventory History (how that state changes)
-* Item Analysis (derived insights)
-* Inventory Panel (interaction surface)
-
-Pantry represents the **real-world environment** that the application models.
+Each layer derives information from the previous one.
 
 ---
 
@@ -124,17 +164,15 @@ Pantry represents the **real-world environment** that the application models.
 
 ## Item
 
-Defines the **identity of a thing**.
+Items represent **identities of things** independent of inventory.
 
-Items represent what something *is*, independent of whether it exists in the pantry.
-
-Example items:
+Examples:
 
 * Eggs
 * Milk
 * Spinach
 
-Items do **not expire**.
+Items themselves **do not expire**.
 
 Example structure:
 
@@ -142,8 +180,8 @@ Example structure:
 Item
 id
 name
-category (future)
-tags (future)
+category
+tags
 source
 ```
 
@@ -151,19 +189,9 @@ source
 
 ## Inventory
 
-Inventory represents the **analytical snapshot of what currently exists in the pantry**.
+Inventory represents the **current grouped state of the pantry**.
 
-Inventory is **grouped by item**, not by physical instance.
-
-This avoids tracking every individual carton or container.
-
-Inventory records contain aggregated data such as:
-
-* total quantity
-* locations
-* expiring soon count
-* expired count
-* low stock threshold
+Rather than tracking every individual container, inventory aggregates item quantities.
 
 Example structure:
 
@@ -171,27 +199,24 @@ Example structure:
 InventoryRecord
 itemId
 totalQuantity
-locations
+healthyCount
 expiringSoonCount
 expiredCount
 lowStockThreshold
+locations
 updatedAt
 source
 ```
 
 Important rule:
 
-**Inventory stores grouped pantry state, not individual item instances.**
+**Inventory records represent grouped pantry state, not individual instances.**
 
 ---
 
 ## Inventory History
 
-Tracks **aggregated item-level changes over time**.
-
-History does **not** track the lifecycle of every individual instance.
-
-Instead, it records meaningful pantry changes.
+Tracks **aggregated changes over time**.
 
 Examples:
 
@@ -214,15 +239,20 @@ lastEventAt
 source
 ```
 
+History provides the **time dimension** of the pantry.
+
 ---
 
 ## Item Analysis
 
 Item Analysis derives insights from:
 
-* Items
-* Inventory
-* Inventory History
+```
+Items
+Inventory
+Inventory History
+Shelf Life
+```
 
 Examples of insights:
 
@@ -235,46 +265,30 @@ Item Analysis **never mutates pantry state**.
 
 ---
 
-## Inventory Panel
+## Recommendations
 
-The **interaction surface** of the pantry.
+Derived from item analysis.
 
-Responsibilities:
+Examples:
 
-* viewing inventory
-* triggering item actions
-* displaying analysis results
+```
+check-item
+use-soon
+restock-soon
+```
 
-Rule:
-
-**Inventory Panel renders and interacts but does not own domain truth.**
+Recommendations are ranked and displayed to the user.
 
 ---
 
-# Future Domain (Not Inside Pantry)
+## Shopping List
 
-## Recipes (Future Feature)
-
-Recipes are a separate domain that **links to Pantry**, but are **not part of Pantry itself**.
-
-Recipes may reference:
-
-* Items
-* Pantry state
-* Inventory insights
-
-Example future features:
-
-* Recipe Library
-* Recipe Builder
-* Recipe Suggestions
-
-Relationship:
+A shopping list can be generated from ranked recommendations.
 
 ```
-Pantry → informs Recipes
-Recipes reference Items
-Recipes are not inside Pantry
+recommendations
+→ priority ranking
+→ shopping list
 ```
 
 ---
@@ -298,34 +312,29 @@ src/features/
 
 Definitions:
 
-**components/**
+### components/
+
 JSX rendering layer.
 
-**data/**
+### data/
+
 TAT program definitions and registries.
 
-**styles/**
+### styles/
+
 Feature CSS.
 
-**hooks/**
+### hooks/
+
 Feature-specific React hooks.
 
-**handlers/**
-TAT execution handlers.
+### handlers/
 
-**utils/**
+Runtime execution handlers.
+
+### utils/
+
 Feature utilities.
-
----
-
-# TAT Rules
-
-* TAT files define application behavior.
-* Registries must be **explicitly declared**.
-* `.tat` files are parsed into normalized `TatProgram` objects.
-* Runtime executes programs using handlers.
-
-There is **no filesystem auto-discovery** of TAT files.
 
 ---
 
@@ -341,7 +350,7 @@ The runtime manages:
 * outputs
 * execution history
 
-Handlers update state and emit events.
+Handlers mutate state and emit events.
 
 ---
 
@@ -372,32 +381,11 @@ Example state shape:
 
 ---
 
-# Seed / Demo State
-
-Seed state is allowed for development and testing.
-
-Rules:
-
-* seed state must be explicitly injected
-* seed mode must be visible in session state
-* seeded records must include metadata
-
-Example source metadata:
-
-```
-source: {
-  kind: "seed" | "user",
-  label: string
-}
-```
-
----
-
 # CSS Architecture
 
-CSS follows a **broad → specific naming pattern using kebab-case**.
+CSS follows a **broad → specific naming pattern** using kebab-case.
 
-## Root App Class
+### Root App Class
 
 ```
 tat-app
@@ -407,7 +395,7 @@ Defines global CSS variables.
 
 ---
 
-## Feature Root
+### Feature Root
 
 ```
 tat-feature-{feature-name}
@@ -417,7 +405,7 @@ Allows feature-level CSS variable overrides.
 
 ---
 
-## Component Naming
+### Component Naming
 
 ```
 {feature}-{component}
@@ -432,37 +420,7 @@ inventory-row
 
 ---
 
-## Elements
-
-```
-{component}-{element}
-```
-
-Example:
-
-```
-inventory-row-name
-inventory-row-quantity
-```
-
----
-
-## Modifiers
-
-```
-{component}--{modifier}
-```
-
-Example:
-
-```
-inventory-row--low-stock
-inventory-row--expired
-```
-
----
-
-# CSS Variable System
+### CSS Variables
 
 Variables are **semantic**, not color-based.
 
@@ -470,9 +428,7 @@ Examples:
 
 ```
 --color-surface
---color-surface-alt
 --color-text
---color-text-muted
 --color-border
 
 --color-accent
@@ -487,119 +443,102 @@ Variables cascade:
 tat-app → tat-feature → component
 ```
 
-Components must **never hardcode colors**.
+Components never hardcode colors.
 
 ---
 
 # Development Rules
 
-Always follow:
+The application always follows:
 
-1. **TAT first**
-2. **Render second**
-3. **Beautify third**
+```
+Structure → Logic → UI → Styling
+```
+
+Or more specifically:
+
+```
+TAT → JSX → CSS
+```
 
 Meaning:
 
-* Structure is defined in TAT.
-* JSX reflects runtime truth.
-* CSS improves readability and aesthetics.
+1. **Define structure**
+2. **Implement runtime logic**
+3. **Render with JSX**
+4. **Improve readability with CSS**
+
+UI should never become the source of truth for domain logic.
 
 ---
 
-# Version 1 Scope
+# Scenario Testing
 
-Initial vertical slices focus on Pantry core functionality:
+The project includes a scenario harness used to test pantry behavior.
 
-* Item
-* Inventory
-* Inventory History
+Scenarios execute TAT programs directly through the runtime without requiring UI.
 
-Actions implemented first:
+```
+bootTatApp(...)
+runtime.dispatch(...)
+```
 
-* add item
-* consume item
+This allows deterministic testing of edge cases such as:
 
-Analysis and recipes come later.
-
----
-
-# Slice 1 Runtime Notes
-
-Slice 1 is wired through explicit Pantry registry + TAT programs only:
-
-* `src/features/pantry/data/registry.js`
-* `src/features/pantry/data/programs/pantry-root.tat`
-* `src/features/pantry/data/programs/item-root.tat`
-* `src/features/pantry/data/programs/inventory-root.tat`
-* `src/features/pantry/data/programs/add-item.tat`
-* `src/features/pantry/data/programs/consume-item.tat`
-
-Slice 1 state is grouped and aggregate-first:
-
-* `pantry.items.items`
-* `pantry.inventory.records`
-* `pantry.inventoryHistory.records`
-
-Scenario harness coverage for Slice 1 lives in `src/scenarios/` and executes through `bootTatApp(...)` + `runtime.dispatch(...)` (no JSX semantics).
+* expiration transitions
+* recommendation generation
+* restocking logic
+* inventory mutations
 
 ---
 
-## Feature Implementation Contract
+# Future Expansion
 
-Before implementing any new slice or feature, evaluate it in this order:
+Predictive Pantry is designed to support additional domains.
 
-### 1. Structure / Semantics
-- Does the required state shape already exist?
-- Does the concept have a clear record contract, vocabulary, and pipeline position?
-- If not, define those first.
+### Recipes (Future Feature)
 
-Examples:
-- state location
-- record fields
-- allowed values
-- upstream/downstream dependencies
+Recipes will reference pantry data but remain a **separate domain**.
 
-No implementation should begin before the semantic structure is clear.
+```
+Pantry → informs Recipes
+Recipes reference Items
+Recipes are not inside Pantry
+```
 
-### 2. Logic
-- Does the runtime logic already exist to support the feature?
-- If not, implement the behavior first.
-- Scenario coverage should validate the logic before UI polish.
+Potential features:
 
-This includes:
-- handlers
-- helpers
-- derivation rules
-- pipeline rules
-- event behavior
+```
+Recipe Library
+Recipe Builder
+Recipe Suggestions
+```
 
-### 3. Component Availability
-- Is there already a feature-owned component or panel where the feature belongs?
-- If not, add the correct UI surface.
+---
 
-UI should remain a rendering and intent layer.
-Business logic must stay in runtime/handlers/helpers.
+## Purpose of This Document
 
-### 4. Human-Readable Readiness
-- Is the feature stable enough to render as human-readable UI instead of JSON?
-- If yes, upgrade it from raw JSON to a human-readable presentation.
-- If no, keep it in JSON until the semantics settle.
+This README serves as the **architectural contract** for the project.
 
-### Rule of Order
-Always build in this order:
+All development — human or AI-assisted — should align with this specification.
 
-semantic structure  
-→ logic  
-→ component  
-→ human-readable UI
+If the implementation diverges from the architecture, the specification should be updated intentionally rather than bypassed.
 
-Never skip ahead to UI polish if structure or logic is still unsettled.
+## License
 
-# Purpose of This Document
+© 2026 Carl Biggers-Johanson
 
-This README serves as the **locked architectural contract** for the project.
+This project is provided for educational, portfolio, and demonstration purposes.
 
-All automated tooling and human development should align with this specification.
+You are free to:
+- view the source
+- study the architecture
+- learn from the implementation
 
-If the implementation diverges from this spec, the spec should be updated intentionally rather than silently bypassed.
+You may not reproduce, distribute, or use this code commercially without explicit permission from the author.
+
+Predictive Pantry and the TryAngleTree (TAT) architecture are original works created and developed by **Carl Biggers-Johanson.**
+
+For licensing inquiries or collaboration opportunities, please contact:
+
+cjohanson64@gmail.com
