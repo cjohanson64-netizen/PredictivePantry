@@ -1,0 +1,22 @@
+# program: predictRebuy
+# feature: predictivePantryConsole
+# purpose: Simulate predictive rebuy routing.
+# inputs:
+#   - depletion signals
+# state-read:
+#   - days remaining
+# actions:
+#   - graft predict_rebuy and list routes
+# decisions:
+#   - add predicted items to grocery flow
+# transitions:
+#   - item -> decision:predict_rebuy -> artifact:grocery_list
+# outputs:
+#   - graph g
+# events:
+#   - ROUTE_TO_DECISION
+#   - ROUTE_TO_GROCERY
+
+g
+  -> @graft.branch("item:eggs", "routesTo", "decision:predict_rebuy")
+  -> @graft.branch("item:eggs", "routesTo", "artifact:grocery_list")

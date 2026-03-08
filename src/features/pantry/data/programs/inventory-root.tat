@@ -1,0 +1,36 @@
+program: inventoryRoot
+feature: pantry
+purpose: Define grouped inventory and aggregate history semantics for Pantry Slice 1.
+inputs:
+  - grouped inventory payload
+state-read:
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+actions:
+  - ADD_ITEM
+  - CONSUME_ITEM
+decisions:
+  - inventory is grouped by item and not tracked per physical instance
+transitions:
+  - from: inventoryContextLoaded
+    to: inventoryReady
+    on-success: groupedInventoryEstablished
+outputs:
+  - kind: status
+    name: inventoryReady
+events:
+  - ITEM_ADDED
+  - ITEM_CONSUMED
+notes:
+  - Inventory History remains aggregated at item level.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

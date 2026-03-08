@@ -1,0 +1,42 @@
+program: resolveRecommendation
+feature: pantry
+purpose: Resolve actionable pantry recommendations with either mutation or suppression semantics.
+inputs:
+  - payload.itemId
+  - payload.recommendation
+  - payload.resolution
+  - payload.quantity (required for restock-soon + bought)
+state-read:
+  - pantry.items.items
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+  - pantry.recommendationResolutions.records
+actions:
+  - RESOLVE_RECOMMENDATION
+decisions:
+  - validate recommendation and resolution pairing
+  - apply mutation resolution semantics or suppression resolution semantics
+  - preserve stable item identity
+transitions:
+  - from: recommendationResolutionRequested
+    to: recommendationResolutionApplied
+    on-success: recommendationResolved
+outputs:
+  - kind: recommendation-resolution
+    name: recommendationResolution
+events:
+  - RECOMMENDATION_RESOLVED
+notes:
+  - Suppression is persisted in recommendation resolution records.
+  - Handlers execute semantics; panel only dispatches intent.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

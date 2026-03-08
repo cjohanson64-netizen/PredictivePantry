@@ -1,0 +1,33 @@
+program: itemRoot
+feature: pantry
+purpose: Define item identity semantics for the Pantry domain.
+inputs:
+  - item identity payload
+state-read:
+  - pantry.items.items
+actions:
+  - ADD_ITEM
+decisions:
+  - item identity is canonical and stable by item id
+transitions:
+  - from: itemContextLoaded
+    to: itemIdentityReady
+    on-success: identityValidated
+outputs:
+  - kind: status
+    name: itemIdentityReady
+events:
+  - ITEM_ADDED
+notes:
+  - Item records capture identity only, not per-instance lifecycle.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

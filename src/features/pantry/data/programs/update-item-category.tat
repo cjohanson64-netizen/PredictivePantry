@@ -1,0 +1,36 @@
+program: updateItemCategory
+feature: pantry
+purpose: Update an item's category metadata while preserving stable item identity.
+inputs:
+  - itemId
+  - category
+state-read:
+  - pantry.items.items
+actions:
+  - UPDATE_ITEM_CATEGORY
+decisions:
+  - validate category against fixed pantry vocabulary
+  - upsert category on existing item record only
+  - preserve itemId and non-category fields
+transitions:
+  - from: categoryUpdateRequested
+    to: categoryUpdateApplied
+    on-success: itemCategoryUpdated
+outputs:
+  - kind: status
+    name: itemCategoryUpdated
+events:
+  - ITEM_CATEGORY_UPDATED
+notes:
+  - Category belongs on item metadata, not inventory records.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

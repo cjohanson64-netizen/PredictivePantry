@@ -1,0 +1,33 @@
+{
+  "name": "predictive-pantry",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "tryangletree-core",
+    "apps/predictive-pantry-console"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "smoke:locked": "npm run smoke:locked-spec -w tryangletree-core",
+    "test": "npm run smoke:locked && npm run build",
+    "predictive-pantry": "node apps/predictive-pantry-console/src/index.mjs"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
+    "@tryangletree/core": "file:./tryangletree-core",
+    "monaco-editor": "^0.52.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
+  }
+}

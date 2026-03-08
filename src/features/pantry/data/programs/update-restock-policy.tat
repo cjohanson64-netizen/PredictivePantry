@@ -1,0 +1,36 @@
+program: updateRestockPolicy
+feature: pantry
+purpose: Set or update per-item restock intent policy without mutating inventory counts.
+inputs:
+  - itemId
+  - policy
+state-read:
+  - pantry.restockPolicy.records
+actions:
+  - UPDATE_RESTOCK_POLICY
+decisions:
+  - validate policy vocabulary always|learn|never
+  - upsert one policy record keyed by itemId
+  - preserve createdAt for existing record
+transitions:
+  - from: policyUpdateRequested
+    to: policyUpdateApplied
+    on-success: restockPolicyUpdated
+outputs:
+  - kind: status
+    name: restockPolicyUpdated
+events:
+  - RESTOCK_POLICY_UPDATED
+notes:
+  - Restock policy is preference state used by recommendation semantics.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

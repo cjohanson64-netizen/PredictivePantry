@@ -1,0 +1,128 @@
+import { tatScenarioDefinitions } from "../../../scenarios"
+
+export type ScenarioCategory = "smoke" | "invariant" | "precedence" | "evolution" | "recovery"
+
+const categoryByScenarioName: Record<string, ScenarioCategory> = {
+  "add-item-happy-path": "smoke",
+  "consume-item-happy-path": "smoke",
+  "healthy-count-add": "smoke",
+  "healthy-count-consume": "smoke",
+
+  "analyze-inventory-expiring-soon-dominates": "precedence",
+  "analyze-inventory-expired-dominates": "precedence",
+  "recommend-check-item": "precedence",
+  "recommend-use-soon": "precedence",
+  "recommend-restock-soon-from-replenish": "precedence",
+  "recommend-restock-soon-from-low-stock": "precedence",
+  "recommend-none": "precedence",
+
+  "low-stock-uses-healthy-count": "invariant",
+
+  "auto-analysis-after-add-item": "evolution",
+  "auto-analysis-after-consume-item": "evolution",
+  "auto-analysis-after-update-threshold": "evolution",
+  "auto-analysis-after-update-expiration-counts": "evolution",
+  "expiring-count-update": "evolution",
+  "expired-count-update": "evolution",
+  "rank-check-item-first": "precedence",
+  "rank-use-soon-over-restock": "precedence",
+  "rank-restock-tie-break-healthy-count": "precedence",
+  "rank-restock-tie-break-consumed-count": "precedence",
+  "rank-alphabetical-stability": "invariant",
+  "rank-none-last": "invariant",
+  "restock-policy-always": "invariant",
+  "restock-policy-learn": "invariant",
+  "restock-policy-never-suppresses-restock": "precedence",
+  "restock-policy-never-does-not-suppress-expiration": "precedence",
+  "add-item-defaults-to-learn": "smoke",
+  "never-blocks-replenish": "invariant",
+  "always-allows-replenish": "invariant",
+  "never-does-not-block-expired": "precedence",
+  "never-does-not-block-expiring-soon": "precedence",
+  "learn-recent-consumption-promotes-restock": "invariant",
+  "learn-stale-consumption-does-not-promote-restock": "invariant",
+  "stale-analysis-produces-stale-recommendations": "recovery",
+  "orphaned-recommendations-after-item-removal": "recovery",
+  "orphaned-activity-log-readd-item": "evolution",
+  "duplicate-item-normalization": "invariant",
+  "rename-preserves-identity": "invariant",
+  "rename-does-not-duplicate-item": "invariant",
+  "rename-blocks-duplicate-name": "invariant",
+  "rename-blocks-duplicate-name-case-insensitive": "invariant",
+  "rename-blocks-duplicate-name-trimmed": "invariant",
+  "rename-success-still-works-for-unique-name": "smoke",
+  "rename-updates-ai-display": "evolution",
+  "rename-updates-shopping-list-display": "evolution",
+  "delete-removes-item-everywhere": "recovery",
+  "delete-removes-activity-and-policy-records": "recovery",
+  "delete-refreshes-ai-and-shopping-list": "recovery",
+  "missing-restock-policy-fallback": "recovery",
+  "policy-flip-stale-priorities": "evolution",
+  "add-expiration-update-race": "evolution",
+  "mixed-pantry-integration": "smoke",
+  "never-policy-does-not-block-expiration": "precedence",
+  "threshold-zero-ambiguity": "invariant",
+  "fully-tied-priority-stability": "invariant",
+  "shopping-list-includes-restock-soon": "smoke",
+  "shopping-list-excludes-check-item": "invariant",
+  "shopping-list-excludes-use-soon": "invariant",
+  "shopping-list-excludes-none": "invariant",
+  "shopping-list-groups-by-category": "invariant",
+  "shopping-list-preserves-priority-within-category": "precedence",
+  "shopping-list-default-category-other": "invariant",
+  "category-edit-updates-shopping-list-group": "evolution",
+  "autopipeline-add-item": "evolution",
+  "autopipeline-consume-item": "evolution",
+  "autopipeline-threshold-update": "evolution",
+  "autopipeline-expiration-update": "evolution",
+  "autopipeline-restock-policy-update": "evolution",
+  "autopipeline-category-update": "evolution",
+  "autopipeline-rename-item": "evolution",
+  "fresh-item-stays-healthy": "invariant",
+  "nearing-expiration-becomes-expiring-soon": "precedence",
+  "beyond-shelf-life-becomes-expired": "precedence",
+  "low-stock-and-expired-conflict": "precedence",
+  "add-item-refreshes-lastStockedAt": "evolution",
+  "non-stock-edits-do-not-refresh-lastStockedAt": "invariant",
+  "shelf-life-edit-reanalyzes-item": "evolution",
+  "persist-after-successful-mutation": "recovery",
+  "rehydrate-on-boot": "recovery",
+  "invalid-snapshot-falls-back-cleanly": "recovery",
+  "reset-clears-persisted-state": "recovery",
+  "time-dependent-data-survives-reload": "invariant",
+  "check-item-discarded-removes-item-instance": "evolution",
+  "check-item-still-good-suppresses-until-next-expiration": "evolution",
+  "check-item-still-good-does-not-remove-item": "invariant",
+  "check-item-still-good-persists-through-reload": "recovery",
+  "fresh-inventory-modal-adds-healthy-stock": "evolution",
+  "fresh-inventory-modal-refreshes-lastStockedAt": "evolution",
+  "restock-bought-uses-fresh-inventory-flow": "evolution",
+  "modal-rejects-invalid-quantity": "recovery",
+  "modal-cancel-does-not-mutate": "invariant",
+  "use-soon-used-removes-item-instance": "evolution",
+  "use-soon-done-suppresses-until-expired": "invariant",
+  "restock-soon-bought-adds-healthy-inventory": "evolution",
+  "restock-soon-done-suppresses-until-quantity-change": "invariant",
+  "recommendations-panel-hides-none": "invariant",
+  "resolution-state-persists-through-reload": "recovery",
+
+  "add-item-validation-failure": "recovery",
+  "consume-item-validation-failure": "recovery",
+}
+
+export function getScenarioCategory(name: string): ScenarioCategory {
+  return categoryByScenarioName[name] ?? "smoke"
+}
+
+export function getScenarioLibrary() {
+  return tatScenarioDefinitions
+    .map((scenario) => ({
+      ...scenario,
+      category: getScenarioCategory(String(scenario.name ?? "")),
+    }))
+    .sort((a, b) => {
+      const aTitle = String((a as any).title ?? a.name ?? "").toLowerCase()
+      const bTitle = String((b as any).title ?? b.name ?? "").toLowerCase()
+      return aTitle.localeCompare(bTitle)
+    })
+}

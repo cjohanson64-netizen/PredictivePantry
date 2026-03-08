@@ -1,0 +1,21 @@
+# program: actions
+# feature: predictivePantryConsole
+# purpose: Console action contracts.
+# inputs:
+#   - item
+# state-read:
+#   - item state
+# actions:
+#   - define action contracts
+# decisions:
+#   - route item to grocery decision
+# transitions:
+#   - item -> decision:add_to_list
+# outputs:
+#   - action definitions
+# events:
+#   - ROUTE_TO_DECISION
+
+restockSoon := @action([item], { edge: triggers }) {
+  graft.branch(item, edge, "decision:add_to_list")
+}

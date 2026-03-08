@@ -1,0 +1,36 @@
+program: generateShoppingList
+feature: pantry
+purpose: Generate a category-grouped acquisition shopping list from pantry priorities.
+inputs:
+  - none
+state-read:
+  - pantry.priorities.records
+  - pantry.items.items
+actions:
+  - GENERATE_SHOPPING_LIST
+decisions:
+  - include only restock-soon recommendations
+  - sort by fixed category order then pantry priority rank
+  - assign shopping-list-local ranks after filtering
+transitions:
+  - from: shoppingListRequested
+    to: shoppingListGenerated
+    on-success: shoppingListStored
+outputs:
+  - kind: shopping-list
+    name: shoppingList
+events:
+  - SHOPPING_LIST_GENERATED
+notes:
+  - Shopping list is derived-only and recomputed from scratch each run.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

@@ -1,0 +1,37 @@
+program: updateItemName
+feature: pantry
+purpose: Update an item's display name while preserving stable item identity.
+inputs:
+  - itemId
+  - name
+state-read:
+  - pantry.items.items
+actions:
+  - UPDATE_ITEM_NAME
+decisions:
+  - validate payload itemId and name
+  - trim name and reject empty values
+  - reject duplicate normalized item names across different itemIds
+  - upsert name on existing item record without changing itemId
+transitions:
+  - from: nameUpdateRequested
+    to: nameUpdateApplied
+    on-success: itemNameUpdated
+outputs:
+  - kind: status
+    name: itemNameUpdated
+events:
+  - ITEM_NAME_UPDATED
+notes:
+  - Name is display metadata and must not alter stable identity.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

@@ -1,0 +1,37 @@
+program: consumeItem
+feature: pantry
+purpose: Consume quantity from grouped pantry inventory and update aggregate inventory history.
+inputs:
+  - itemId
+  - amount
+state-read:
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+actions:
+  - CONSUME_ITEM
+decisions:
+  - validate item exists in grouped inventory
+  - validate amount is positive and available
+  - increment aggregate consumed count
+transitions:
+  - from: consumeRequested
+    to: consumeApplied
+    on-success: itemConsumed
+outputs:
+  - kind: status
+    name: consumeApplied
+events:
+  - ITEM_CONSUMED
+notes:
+  - Fails with structured errors when item is missing or amount is invalid.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

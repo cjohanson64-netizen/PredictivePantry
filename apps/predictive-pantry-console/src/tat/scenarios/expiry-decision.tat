@@ -1,0 +1,20 @@
+# program: expiryDecision
+# feature: predictivePantryConsole
+# purpose: Simulate expiry decision route.
+# inputs:
+#   - item:spinach
+# state-read:
+#   - expiry state
+# actions:
+#   - graft prioritize_use route
+# decisions:
+#   - prioritize soon-to-expire item
+# transitions:
+#   - item:spinach -> decision:prioritize_use
+# outputs:
+#   - graph g
+# events:
+#   - ROUTE_TO_DECISION
+
+g
+  -> @graft.branch("item:spinach", "triggers", "decision:prioritize_use")

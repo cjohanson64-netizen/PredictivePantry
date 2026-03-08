@@ -1,0 +1,45 @@
+program: addItem
+feature: pantry
+purpose: Add quantity to a grouped pantry inventory item and update aggregate inventory history.
+inputs:
+  - itemId
+  - quantity
+  - name
+  - category
+  - shelfLifeDays
+state-read:
+  - pantry.items.items
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+actions:
+  - ADD_ITEM
+  - UPDATE_THRESHOLD
+  - UPDATE_EXPIRATION_COUNTS
+decisions:
+  - create item identity if missing
+  - increment grouped inventory quantity
+  - refresh inventory lastStockedAt only when quantity added is greater than zero
+  - update threshold and expiration counts for existing item when requested
+  - increment aggregate history added count
+transitions:
+  - from: addRequested
+    to: addApplied
+    on-success: itemAdded
+outputs:
+  - kind: status
+    name: addApplied
+events:
+  - ITEM_ADDED
+notes:
+  - No per-instance inventory identities are created.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

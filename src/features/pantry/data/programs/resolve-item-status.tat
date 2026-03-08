@@ -1,0 +1,64 @@
+program: resolveItemStatus
+feature: pantry
+purpose: Resolve dominant item status from active analysis signals using weighted status nodes.
+inputs:
+  - candidate status flags
+state-read:
+  - active analysis signals
+actions:
+  - RESOLVE_ITEM_STATUS
+decisions:
+  - evaluate active weighted status nodes
+  - select highest weighted active status
+transitions:
+  - from: statusCandidatesReady
+    to: statusResolved
+    on-success: dominantStatusSelected
+outputs:
+  - kind: status
+    name: resolvedStatus
+events:
+  - ITEM_ANALYZED
+notes:
+  - Healthy is fallback when no weighted status condition is active.
+---
+
+g := @seedgraph({
+  nodes: [
+    "status:expired",
+    "status:expiring-soon",
+    "status:replenish-soon",
+    "status:low-stock"
+  ],
+  edges: [
+    ["status:expired", "outweighs", "status:expiring-soon"],
+    ["status:expired", "outweighs", "status:replenish-soon"],
+    ["status:expired", "outweighs", "status:low-stock"],
+    ["status:expiring-soon", "outweighs", "status:replenish-soon"],
+    ["status:expiring-soon", "outweighs", "status:low-stock"],
+    ["status:replenish-soon", "outweighs", "status:low-stock"]
+  ],
+  state: {
+    "status:expired": {
+      weight: 100,
+      flag: "isExpired"
+    },
+    "status:expiring-soon": {
+      weight: 80,
+      flag: "isExpiringSoon"
+    },
+    "status:replenish-soon": {
+      weight: 60,
+      flag: "isReplenishmentCandidate"
+    },
+    "status:low-stock": {
+      weight: 40,
+      flag: "isLowStock"
+    }
+  },
+  meta: {},
+  trail: [],
+  root: "status:expired"
+})
+
+g

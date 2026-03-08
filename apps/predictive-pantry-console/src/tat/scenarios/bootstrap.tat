@@ -1,0 +1,19 @@
+# program: bootstrap
+# feature: predictivePantryConsole
+# purpose: Return initial graph state.
+# inputs:
+#   - g
+# state-read:
+#   - root graph
+# actions:
+#   - none
+# decisions:
+#   - none
+# transitions:
+#   - g -> g
+# outputs:
+#   - graph g
+# events:
+#   - ITEM_CREATED
+
+g

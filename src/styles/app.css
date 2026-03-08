@@ -1,0 +1,84 @@
+:root {
+  --color-text-primary: #e6edf3;
+  --color-text-secondary: #b6c2cf;
+  --color-text-muted: #8b949e;
+  --color-text-disabled: #6b7280;
+
+  --color-status-error: #ff6b6b;
+  --color-status-warning: #f2cc60;
+  --color-status-success: #7ee787;
+  --color-status-info: #79c0ff;
+
+  --color-category-smoke: #79c0ff;
+  --color-category-evolution: #a5d6ff;
+  --color-category-recovery: #ffa657;
+  --color-category-invariant: #c297ff;
+  --color-category-precedence: #7ee787;
+
+  --color-panel-bg: #0d1117;
+  --color-panel-border: #30363d;
+  --color-panel-header: #e6edf3;
+
+  --color-code-bg: #0d1117;
+  --color-code-text: #e6edf3;
+  --color-code-key: #79c0ff;
+  --color-code-string: #a5d6ff;
+  --color-code-number: #f2cc60;
+  --color-code-boolean: #ff7b72;
+  --color-code-null: #8b949e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: var(--color-panel-bg);
+  color: var(--color-text-primary);
+}
+
+.tat-app {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+}
+
+.app-shell {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+}
+
+.app-shell-view-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.app-shell-view-toggle-button {
+  border: 1px solid var(--color-panel-border);
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-panel-bg) 92%, white 8%);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px 10px;
+}
+
+.app-shell-view-toggle-button--active {
+  background: color-mix(in srgb, var(--color-status-info) 24%, var(--color-panel-bg) 76%);
+  border-color: var(--color-status-info);
+}
+
+.app-shell-workspace {
+  min-height: 0;
+  overflow: hidden;
+}

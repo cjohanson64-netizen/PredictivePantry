@@ -1,0 +1,36 @@
+program: updateItemShelfLife
+feature: pantry
+purpose: Update per-item shelf life days metadata used for expiration inference.
+inputs:
+  - itemId
+  - shelfLifeDays
+state-read:
+  - pantry.items.items
+actions:
+  - UPDATE_ITEM_SHELF_LIFE
+decisions:
+  - validate payload itemId and shelfLifeDays
+  - update existing item metadata only
+  - preserve stable itemId and inventory counts
+transitions:
+  - from: shelfLifeUpdateRequested
+    to: shelfLifeUpdateApplied
+    on-success: itemShelfLifeUpdated
+outputs:
+  - kind: status
+    name: itemShelfLifeUpdated
+events:
+  - ITEM_SHELF_LIFE_UPDATED
+notes:
+  - Shelf life is metadata used by analysis inference and does not directly mutate stock quantities.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

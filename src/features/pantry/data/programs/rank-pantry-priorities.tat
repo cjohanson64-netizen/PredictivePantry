@@ -1,0 +1,38 @@
+program: rankPantryPriorities
+feature: pantry
+purpose: Rank pantry recommendation records into ordered actionable priorities.
+inputs:
+  - none
+state-read:
+  - pantry.recommendations.records
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+  - pantry.items.items
+actions:
+  - RANK_PANTRY_PRIORITIES
+decisions:
+  - sort by recommendation priority descending
+  - apply tie-breaks from severity and stock metrics
+  - assign explicit rank values starting at 1
+transitions:
+  - from: prioritiesRequested
+    to: prioritiesRanked
+    on-success: pantryPrioritiesRanked
+outputs:
+  - kind: priorities
+    name: pantryPriorities
+events:
+  - PANTRY_PRIORITIES_RANKED
+notes:
+  - Priorities are derived-only and do not mutate pantry truth.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

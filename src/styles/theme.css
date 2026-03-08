@@ -1,0 +1,346 @@
+:root {
+  /* Core surfaces */
+  --color-app-bg: #0b1220;
+  --color-panel-bg: #0f172a;
+  --color-panel-bg-alt: #111c31;
+  --color-panel-border: #22314d;
+  --color-panel-border-strong: #31456a;
+  --color-panel-hover: #15233b;
+
+  /* Core text */
+  --color-text-primary: #e5eefc;
+  --color-text-secondary: #bfd0ea;
+  --color-text-muted: #8ea3c2;
+  --color-text-disabled: #667892;
+
+  /* Semantic status */
+  --color-status-error: #ff7b72;
+  --color-status-warning: #f2cc60;
+  --color-status-success: #7ee787;
+  --color-status-info: #79c0ff;
+
+  /* Scenario categories */
+  --color-category-smoke: #79c0ff;
+  --color-category-evolution: #a5d6ff;
+  --color-category-recovery: #ffa657;
+  --color-category-invariant: #c297ff;
+  --color-category-precedence: #7ee787;
+
+  /* Accent / interaction */
+  --color-accent: #79c0ff;
+  --color-accent-strong: #a5d6ff;
+  --color-focus: #79c0ff;
+
+  /* Code / JSON */
+  --color-code-bg: #0b1324;
+  --color-code-text: #dce7f7;
+  --color-code-key: #79c0ff;
+  --color-code-string: #a5d6ff;
+  --color-code-number: #f2cc60;
+  --color-code-boolean: #ff7b72;
+  --color-code-null: #8ea3c2;
+
+  /* Buttons / controls */
+  --color-button-bg: #16233a;
+  --color-button-bg-hover: #1c2d49;
+  --color-button-border: #31456a;
+  --color-button-text: #e5eefc;
+
+  /* Layout */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  --shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-app-bg);
+  color: var(--color-text-primary);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-shell,
+.tat-app,
+.inventory-view,
+.scenario-view {
+  color: var(--color-text-primary);
+}
+
+.tat-console,
+.inventory-view,
+.scenario-view {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.inventory-panel,
+.recommendations-panel,
+.shopping-list-panel,
+.scenario-library-panel,
+.scenario-source-panel,
+.scenario-results-panel {
+  background: var(--color-panel-bg);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.inventory-panel h2,
+.recommendations-panel h2,
+.shopping-list-panel h2,
+.scenario-library-panel h2,
+.scenario-source-panel h2,
+.scenario-results-panel h2 {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+p,
+label,
+span,
+div {
+  color: inherit;
+}
+
+.text-secondary,
+.inventory-panel .help-text,
+.recommendations-panel .help-text,
+.shopping-list-panel .help-text,
+.scenario-library-panel .help-text,
+.scenario-source-panel .help-text,
+.scenario-results-panel .help-text {
+  color: var(--color-text-secondary);
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+button {
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+  border: 1px solid var(--color-button-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--color-button-bg-hover);
+}
+
+button:disabled {
+  color: var(--color-text-disabled);
+  border-color: var(--color-panel-border);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  background: var(--color-panel-bg-alt);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Inventory table */
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventory-table th,
+.inventory-table td {
+  border-bottom: 1px solid var(--color-panel-border);
+  padding: 10px 8px;
+  text-align: left;
+  color: var(--color-text-primary);
+}
+
+.inventory-table th {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.inventory-table-row--new td {
+  background: color-mix(in srgb, var(--color-status-info) 10%, var(--color-panel-bg) 90%);
+}
+
+.inventory-table-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.inventory-table-counter-value {
+  min-width: 24px;
+  text-align: center;
+  color: var(--color-text-primary);
+}
+
+.inventory-table-counter-button {
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+.inventory-table-counter-button--disabled {
+  opacity: 0.5;
+}
+
+/* Scenario cards */
+.scenario-card {
+  background: var(--color-panel-bg-alt);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.scenario-card:hover {
+  border-color: var(--color-panel-border-strong);
+  background: var(--color-panel-hover);
+}
+
+.scenario-card-title {
+  color: var(--color-text-primary);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.scenario-card-description {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.scenario-card-category {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.scenario-card-category--smoke {
+  color: var(--color-category-smoke);
+}
+
+.scenario-card-category--evolution {
+  color: var(--color-category-evolution);
+}
+
+.scenario-card-category--recovery {
+  color: var(--color-category-recovery);
+}
+
+.scenario-card-category--invariant {
+  color: var(--color-category-invariant);
+}
+
+.scenario-card-category--precedence {
+  color: var(--color-category-precedence);
+}
+
+/* Status / result text */
+.status-error,
+.scenario-status-fail,
+.no-run-yet {
+  color: var(--color-status-error);
+}
+
+.status-warning {
+  color: var(--color-status-warning);
+}
+
+.status-success,
+.scenario-status-pass {
+  color: var(--color-status-success);
+}
+
+.status-info {
+  color: var(--color-status-info);
+}
+
+/* JSON / code blocks */
+pre,
+code,
+.scenario-source pre,
+.scenario-results pre,
+.recommendations-panel pre,
+.shopping-list-panel pre {
+  background: var(--color-code-bg);
+  color: var(--color-code-text);
+  border: 1px solid var(--color-panel-border);
+  border-radius: var(--radius-md);
+}
+
+pre {
+  padding: var(--space-4);
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Optional token classes if your JSON renderer supports them */
+.code-key {
+  color: var(--color-code-key);
+}
+
+.code-string {
+  color: var(--color-code-string);
+}
+
+.code-number {
+  color: var(--color-code-number);
+}
+
+.code-boolean {
+  color: var(--color-code-boolean);
+}
+
+.code-null {
+  color: var(--color-code-null);
+}

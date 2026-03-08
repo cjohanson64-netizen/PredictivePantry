@@ -1,0 +1,35 @@
+program: pantryRoot
+feature: pantry
+purpose: Define Pantry as the root Slice 1 domain surface with Item, Inventory, and Inventory History.
+inputs:
+  - session context
+state-read:
+  - pantry
+actions:
+  - ADD_ITEM
+  - CONSUME_ITEM
+decisions:
+  - expose pantry root semantics without mutating runtime state
+transitions:
+  - from: bootRequested
+    to: pantryReady
+    on-success: rootLoaded
+outputs:
+  - kind: status
+    name: pantryReady
+events:
+  - ITEM_ADDED
+  - ITEM_CONSUMED
+notes:
+  - Passive entry program for boot wiring in Slice 1.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

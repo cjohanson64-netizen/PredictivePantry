@@ -1,0 +1,43 @@
+program: removeItem
+feature: pantry
+purpose: Remove one item identity from active pantry state and purge dependent records.
+inputs:
+  - itemId
+state-read:
+  - pantry.items.items
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+  - pantry.itemAnalysis.records
+  - pantry.recommendations.records
+  - pantry.priorities.records
+  - pantry.shoppingList.records
+  - pantry.restockPolicy.records
+  - pantry.activityLog.records
+actions:
+  - REMOVE_ITEM
+decisions:
+  - validate item exists
+  - purge target item from all active pantry layers
+  - emit item removal event
+transitions:
+  - from: itemRemovalRequested
+    to: itemRemovalApplied
+    on-success: itemRemoved
+outputs:
+  - kind: status
+    name: itemRemoved
+events:
+  - ITEM_REMOVED
+notes:
+  - Removal is an all-or-nothing active-state purge for one stable itemId.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

@@ -1,0 +1,22 @@
+# program: stockDecision
+# feature: predictivePantryConsole
+# purpose: Simulate stock decision route.
+# inputs:
+#   - item:eggs
+# state-read:
+#   - quantity/min
+# actions:
+#   - graft route edges
+# decisions:
+#   - send item to grocery list flow
+# transitions:
+#   - item:eggs -> decision:add_to_list
+# outputs:
+#   - graph g
+# events:
+#   - ROUTE_TO_DECISION
+#   - ROUTE_TO_GROCERY
+
+g
+  -> @graft.branch("item:eggs", "routesTo", "decision:add_to_list")
+  -> @graft.branch("item:eggs", "routesTo", "artifact:grocery_list")

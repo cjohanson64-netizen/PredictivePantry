@@ -1,0 +1,38 @@
+program: recommendPantryActions
+feature: pantry
+purpose: Recompute pantry recommendations from canonical inventory, history, and item analysis truth.
+inputs:
+  - none
+state-read:
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+  - pantry.itemAnalysis.records
+actions:
+  - RECOMMEND_PANTRY_ACTIONS
+decisions:
+  - map source analysis status to recommendation vocabulary
+  - assign locked priority values for each recommendation
+  - map expired status to check-item for human safety verification
+  - replace recommendation records with full recomputation
+transitions:
+  - from: recommendationRequested
+    to: recommendationApplied
+    on-success: pantryRecommendationsGenerated
+outputs:
+  - kind: recommendations
+    name: pantryRecommendations
+events:
+  - PANTRY_RECOMMENDATIONS_GENERATED
+notes:
+  - Recommendations are derived state and never mutate pantry truth.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

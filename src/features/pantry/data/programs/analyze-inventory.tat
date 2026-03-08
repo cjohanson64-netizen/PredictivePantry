@@ -1,0 +1,39 @@
+program: analyzeInventory
+feature: pantry
+purpose: Recompute all item analysis records from canonical pantry inventory truth.
+inputs:
+  - none
+state-read:
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+  - pantry.items.items
+actions:
+  - ANALYZE_INVENTORY
+  - RESOLVE_ITEM_STATUS
+decisions:
+  - derive item analysis records from grouped inventory and aggregated history
+  - infer expiration risk from lastStockedAt and shelfLifeDays
+  - resolve final status per record through weighted status resolver
+  - replace analysis records with full recomputation
+transitions:
+  - from: analysisRequested
+    to: analysisApplied
+    on-success: inventoryAnalyzed
+outputs:
+  - kind: analysis
+    name: itemAnalysis
+events:
+  - INVENTORY_ANALYZED
+notes:
+  - Analysis never mutates items, inventory, or inventory history.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g

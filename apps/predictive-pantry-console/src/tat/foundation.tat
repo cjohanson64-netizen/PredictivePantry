@@ -1,0 +1,28 @@
+# program: foundation
+# feature: predictivePantryConsole
+# purpose: Console baseline graph setup.
+# inputs:
+#   - none
+# state-read:
+#   - none
+# actions:
+#   - initialize graph
+# decisions:
+#   - none
+# transitions:
+#   - null -> initialized graph
+# outputs:
+#   - graph g
+# events:
+#   - ITEM_CREATED
+# notes:
+#   - Console-only seed baseline.
+
+g := @seedgraph({
+  nodes: ["app:predictive_pantry", "item:eggs", "artifact:grocery_list"],
+  edges: [["app:predictive_pantry", "contains", "item:eggs"]],
+  state: { "item:eggs": { quantity: 5, min_quantity: 6 } },
+  meta: { "item:eggs": { category: "dairy", unit: "count" } },
+  trail: [],
+  root: "app:predictive_pantry"
+})

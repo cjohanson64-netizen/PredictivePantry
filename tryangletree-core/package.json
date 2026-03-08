@@ -1,0 +1,20 @@
+{
+  "name": "@tryangletree/core",
+  "version": "1.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json -w",
+    "clean": "rm -rf dist",
+    "smoke:locked-spec": "npm run build && node examples/locked-spec-smoke.mjs",
+    "smoke:guard": "npm run build && node examples/guard-smoke.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

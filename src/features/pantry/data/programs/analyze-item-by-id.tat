@@ -1,0 +1,40 @@
+program: analyzeItemById
+feature: pantry
+purpose: Recompute one item analysis record from canonical pantry truth using payload.itemId.
+inputs:
+  - itemId
+state-read:
+  - pantry.inventory.records
+  - pantry.inventoryHistory.records
+  - pantry.itemAnalysis.records
+  - pantry.items.items
+actions:
+  - ANALYZE_ITEM_BY_ID
+  - RESOLVE_ITEM_STATUS
+decisions:
+  - derive one analysis record from inventory and history state
+  - infer expiration risk from lastStockedAt and shelfLifeDays
+  - resolve status via weighted resolver program
+  - upsert only the targeted analysis record
+transitions:
+  - from: itemAnalysisRequested
+    to: itemAnalysisApplied
+    on-success: itemAnalyzed
+outputs:
+  - kind: analysis
+    name: itemAnalysisById
+events:
+  - ITEM_ANALYZED
+notes:
+  - Payload guard accepts only itemId as meaningful analysis input.
+---
+g := @seedgraph({
+  nodes: ["domain:pantry"],
+  edges: [],
+  state: {},
+  meta: {},
+  trail: [],
+  root: "domain:pantry"
+})
+
+g
