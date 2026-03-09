@@ -50,6 +50,7 @@ export default function AppShell() {
           <InventoryView
             snapshot={runtime.snapshot}
             dispatchRuntimeAction={runtime.dispatchRuntimeAction}
+            dispatchAiRefreshPipeline={runtime.dispatchAiRefreshPipeline}
             resetRuntime={runtime.resetRuntime}
           />
         ) : (

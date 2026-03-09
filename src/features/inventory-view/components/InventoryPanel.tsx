@@ -125,7 +125,8 @@ export default function InventoryPanel({
   const [editingCell, setEditingCell] = useState<{ itemId: string; field: EditableField } | null>(null)
   const [editingValue, setEditingValue] = useState("")
   const [editError, setEditError] = useState<string | null>(null)
-  const [sortColumn, setSortColumn] = useState<SortColumn>("item")
+  const [pendingSort, setPendingSort] = useState<SortColumn>("item")
+  const [activeSort, setActiveSort] = useState<SortColumn>("item")
   const editingInputRef = useRef<HTMLInputElement | null>(null)
   const skipBlurCommitRef = useRef(false)
 
@@ -190,7 +191,7 @@ export default function InventoryPanel({
         const bItemId = String(b.itemId)
 
         let comparison = 0
-        switch (sortColumn) {
+        switch (activeSort) {
           case "item": {
             const aName = String(itemNameById[aItemId] ?? aItemId)
             const bName = String(itemNameById[bItemId] ?? bItemId)
@@ -233,7 +234,7 @@ export default function InventoryPanel({
     itemNameById,
     itemShelfLifeById,
     restockPolicyByItemId,
-    sortColumn,
+    activeSort,
   ])
 
   return (
@@ -246,8 +247,8 @@ export default function InventoryPanel({
           <span className="inventory-panel-sort-label">Sort by</span>
           <select
             className="inventory-panel-control inventory-panel-sort-control"
-            value={sortColumn}
-            onChange={(event) => setSortColumn(event.target.value as SortColumn)}
+            value={pendingSort}
+            onChange={(event) => setPendingSort(event.target.value as SortColumn)}
           >
             <option value="item">Name</option>
             <option value="total">Total</option>
@@ -255,6 +256,13 @@ export default function InventoryPanel({
             <option value="category">Category</option>
             <option value="status">Status</option>
           </select>
+          <button
+            className="inventory-table-name-edit-button"
+            onClick={() => setActiveSort(pendingSort)}
+            disabled={pendingSort === activeSort}
+          >
+            Apply
+          </button>
         </label>
         <button className="inventory-table-name-edit-button" onClick={onRequestBatchAddStock}>
           Batch Add Stock

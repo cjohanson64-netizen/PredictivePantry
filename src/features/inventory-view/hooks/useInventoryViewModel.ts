@@ -55,10 +55,12 @@ function asNumber(value: unknown, fallback = 0) {
 export function useInventoryViewModel({
   snapshot,
   dispatchRuntimeAction,
+  dispatchAiRefreshPipeline,
   resetRuntime,
 }: {
   snapshot: Record<string, any>
   dispatchRuntimeAction: (args: PantryRuntimeDispatchArgs) => Record<string, any>
+  dispatchAiRefreshPipeline: (meta?: Record<string, unknown>) => Record<string, any>
   resetRuntime: () => void
 }) {
   const [newItemInput, setNewItemInput] = useState<NewItemInput>({
@@ -352,13 +354,9 @@ export function useInventoryViewModel({
     [dispatchRuntimeAction, inventoryByItemId, toExistingInput],
   )
 
-  const dispatchRecommendPantryActions = useCallback(() => {
-    dispatchRuntimeAction({
-      programName: "recommendPantryActions",
-      actionName: "RECOMMEND_PANTRY_ACTIONS",
-      payload: {},
-    })
-  }, [dispatchRuntimeAction])
+  const dispatchRefreshAi = useCallback(() => {
+    dispatchAiRefreshPipeline({ trigger: "manual-refresh-button" })
+  }, [dispatchAiRefreshPipeline])
 
   const dispatchRankPantryPriorities = useCallback(() => {
     dispatchRuntimeAction({
@@ -551,7 +549,7 @@ export function useInventoryViewModel({
     dispatchRemoveItem,
     dispatchStepShelfLife,
     dispatchSetShelfLife,
-    dispatchRecommendPantryActions,
+    dispatchRefreshAi,
     dispatchRankPantryPriorities,
     dispatchGenerateShoppingList,
     dispatchResolveRecommendation,

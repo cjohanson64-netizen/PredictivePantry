@@ -4,12 +4,14 @@ import {
   buildFullPantryCopyText,
   buildRecipePromptCopyText,
 } from "../../pantry/utils/pantryCopyHelpers"
+import { buildRecommendationCardCopy } from "../utils/recommendationCardCopy"
 
 type RecommendationsPanelProps = {
   pantryItems: Array<Record<string, unknown>>
+  inventoryRecords: Array<Record<string, unknown>>
   recommendations: Array<Record<string, unknown>>
   priorities: Array<Record<string, unknown>>
-  onMakeRecommendations: () => void
+  onRefreshAi: () => void
   onRankPriorities: () => void
   onResolveRecommendation: (args: {
     itemId: string
@@ -37,9 +39,10 @@ function itemNameById(items: Array<Record<string, unknown>>) {
 
 export default function RecommendationsPanel({
   pantryItems,
+  inventoryRecords,
   recommendations,
   priorities,
-  onMakeRecommendations,
+  onRefreshAi,
   onRankPriorities,
   onResolveRecommendation,
   onRequestFreshStockForRecommendation,
@@ -51,6 +54,16 @@ export default function RecommendationsPanel({
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null)
 
   const namesById = useMemo(() => itemNameById(pantryItems), [pantryItems])
+  const inventoryByItemId = useMemo(
+    () =>
+      new Map(
+        (Array.isArray(inventoryRecords) ? inventoryRecords : []).map((record) => [
+          String(record?.itemId ?? ""),
+          record,
+        ]),
+      ),
+    [inventoryRecords],
+  )
 
   const actionableRecommendations = useMemo(
     () =>
@@ -79,7 +92,7 @@ export default function RecommendationsPanel({
 
       <div className="recommendations-panel-toolbar">
         <div className="recommendations-panel-primary-actions">
-          <button className="recommendations-panel-button recommendations-panel-button--primary" onClick={onMakeRecommendations}>
+          <button className="recommendations-panel-button recommendations-panel-button--primary" onClick={onRefreshAi}>
             Refresh AI
           </button>
           <button className="recommendations-panel-button recommendations-panel-button--primary" onClick={onRankPriorities}>
@@ -120,16 +133,28 @@ export default function RecommendationsPanel({
               const itemId = String(record.itemId ?? "")
               const itemName = namesById.get(itemId) ?? itemId
               const recommendation = String(record.recommendation ?? "none")
-              const line =
-                recommendation === "check-item"
-                  ? `Check ${itemName} before consuming`
-                  : recommendation === "use-soon"
-                    ? `Use ${itemName} soon`
-                    : `Restock ${itemName}`
+              const inventoryRecord = inventoryByItemId.get(itemId) ?? null
+              const { title, detail } = buildRecommendationCardCopy({
+                itemName,
+                recommendation:
+                  recommendation === "check-item" ||
+                  recommendation === "use-soon" ||
+                  recommendation === "restock-soon"
+                    ? recommendation
+                    : "none",
+                sourceStatus: typeof record.sourceStatus === "string" ? record.sourceStatus : undefined,
+                reasons: Array.isArray(record.reasons) ? record.reasons.map(String) : undefined,
+                metrics: {
+                  expiringSoonCount: inventoryRecord?.expiringSoonCount,
+                  healthyCount: inventoryRecord?.healthyCount,
+                  lowStockThreshold: inventoryRecord?.lowStockThreshold,
+                },
+              })
 
               return (
                 <div key={`${itemId}:${recommendation}`} className="recommendations-panel-card">
-                  <div className="recommendations-panel-line">{line}</div>
+                  <div className="recommendations-panel-title">{title}</div>
+                  <div className="recommendations-panel-line">{detail}</div>
                   <div className="recommendations-panel-card-actions">
                     {recommendation === "check-item" ? (
                       <>
@@ -217,24 +242,24 @@ export default function RecommendationsPanel({
         ) : (
           <div className="recommendations-panel-empty">No actionable recommendations right now.</div>
         )}
-      </div>
 
-      {showDebugJson ? (
-        <div className="panel-debug-json">
-          <div className="panel-debug-json-section">
-            <div className="panel-debug-json-title">Analysis</div>
-            <pre className="panel-json">{JSON.stringify(debugItemAnalysisRecords, null, 2)}</pre>
+        {showDebugJson ? (
+          <div className="panel-debug-json">
+            <div className="panel-debug-json-section">
+              <div className="panel-debug-json-title">Analysis</div>
+              <pre className="panel-json">{JSON.stringify(debugItemAnalysisRecords, null, 2)}</pre>
+            </div>
+            <div className="panel-debug-json-section">
+              <div className="panel-debug-json-title">Recommendations</div>
+              <pre className="panel-json">{JSON.stringify(debugRecommendationRecords, null, 2)}</pre>
+            </div>
+            <div className="panel-debug-json-section">
+              <div className="panel-debug-json-title">Priorities</div>
+              <pre className="panel-json">{JSON.stringify(debugPriorityRecords, null, 2)}</pre>
+            </div>
           </div>
-          <div className="panel-debug-json-section">
-            <div className="panel-debug-json-title">Recommendations</div>
-            <pre className="panel-json">{JSON.stringify(debugRecommendationRecords, null, 2)}</pre>
-          </div>
-          <div className="panel-debug-json-section">
-            <div className="panel-debug-json-title">Priorities</div>
-            <pre className="panel-json">{JSON.stringify(debugPriorityRecords, null, 2)}</pre>
-          </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </section>
   )
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createTatRuntime, type TatRuntimeSnapshot } from "../createTatRuntime"
 import { bootTatApp } from "./bootTatApp.js"
 import { tatFeatureRegistries } from "../../features/Directory.jsx"
@@ -51,6 +51,8 @@ export type PantryRuntimeDispatchArgs = {
   payload: Record<string, unknown>
   meta?: Record<string, unknown>
 }
+
+const AI_REFRESH_INTERVAL_MS = 60 * 60 * 1000
 
 function createWorkspaceRuntime() {
   const persistedEnvelope = readPersistedRuntimeEnvelope()
@@ -127,10 +129,11 @@ export function usePantryWorkspaceRuntime() {
   const bootSession = useMemo(() => createWorkspaceRuntime(), [])
   const runtimeRef = useRef<any>(bootSession.runtime)
   const [snapshot, setSnapshot] = useState<TatRuntimeSnapshot>(bootSession.snapshot)
+  const didRunInitialAiRefreshRef = useRef(false)
 
   const dispatchRuntimeAction = useCallback((args: PantryRuntimeDispatchArgs) => {
     const runtime = runtimeRef.current
-    if (!runtime) return snapshot
+    if (!runtime) return bootSession.snapshot
 
     const previousSnapshot = runtime.getSnapshot()
     const nextSnapshot = runtime.dispatch({
@@ -152,7 +155,65 @@ export function usePantryWorkspaceRuntime() {
 
     setSnapshot(nextSnapshot)
     return nextSnapshot
-  }, [snapshot])
+  }, [bootSession.snapshot])
+
+  const dispatchAiRefreshPipeline = useCallback(
+    (meta: Record<string, unknown> = {}) => {
+      dispatchRuntimeAction({
+        programName: "analyzeInventory",
+        actionName: "ANALYZE_INVENTORY",
+        payload: {},
+        meta: {
+          refreshReason: "ai-refresh",
+          ...meta,
+        },
+      })
+      dispatchRuntimeAction({
+        programName: "recommendPantryActions",
+        actionName: "RECOMMEND_PANTRY_ACTIONS",
+        payload: {},
+        meta: {
+          refreshReason: "ai-refresh",
+          ...meta,
+        },
+      })
+      dispatchRuntimeAction({
+        programName: "rankPantryPriorities",
+        actionName: "RANK_PANTRY_PRIORITIES",
+        payload: {},
+        meta: {
+          refreshReason: "ai-refresh",
+          ...meta,
+        },
+      })
+      return dispatchRuntimeAction({
+        programName: "generateShoppingList",
+        actionName: "GENERATE_SHOPPING_LIST",
+        payload: {},
+        meta: {
+          refreshReason: "ai-refresh",
+          ...meta,
+        },
+      })
+    },
+    [dispatchRuntimeAction],
+  )
+
+  useEffect(() => {
+    if (didRunInitialAiRefreshRef.current) return
+    didRunInitialAiRefreshRef.current = true
+    dispatchAiRefreshPipeline({ trigger: "app-load" })
+  }, [dispatchAiRefreshPipeline])
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      dispatchAiRefreshPipeline({ trigger: "hourly-interval" })
+    }, AI_REFRESH_INTERVAL_MS)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [dispatchAiRefreshPipeline])
 
   const resetRuntime = useCallback(() => {
     clearPersistedRuntimeState()
@@ -164,6 +225,7 @@ export function usePantryWorkspaceRuntime() {
   return {
     snapshot,
     dispatchRuntimeAction,
+    dispatchAiRefreshPipeline,
     resetRuntime,
   }
 }

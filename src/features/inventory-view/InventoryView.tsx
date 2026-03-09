@@ -12,12 +12,14 @@ import "./styles/inventory-view.css"
 type InventoryViewProps = {
   snapshot: TatRuntimeSnapshot
   dispatchRuntimeAction: (args: PantryRuntimeDispatchArgs) => TatRuntimeSnapshot
+  dispatchAiRefreshPipeline: (meta?: Record<string, unknown>) => TatRuntimeSnapshot
   resetRuntime: () => void
 }
 
 export default function InventoryView({
   snapshot,
   dispatchRuntimeAction,
+  dispatchAiRefreshPipeline,
   resetRuntime,
 }: InventoryViewProps) {
   const [showDebugJson, setShowDebugJson] = useState(false)
@@ -27,6 +29,7 @@ export default function InventoryView({
   const vm = useInventoryViewModel({
     snapshot: snapshot as any,
     dispatchRuntimeAction,
+    dispatchAiRefreshPipeline,
     resetRuntime,
   })
 
@@ -121,9 +124,10 @@ export default function InventoryView({
 
       <RecommendationsPanel
         pantryItems={vm.pantryItems as Array<Record<string, unknown>>}
+        inventoryRecords={vm.inventoryRecords as Array<Record<string, unknown>>}
         recommendations={vm.recommendationRecords}
         priorities={vm.priorityRecords}
-        onMakeRecommendations={vm.dispatchRecommendPantryActions}
+        onRefreshAi={vm.dispatchRefreshAi}
         onRankPriorities={vm.dispatchRankPantryPriorities}
         onResolveRecommendation={vm.dispatchResolveRecommendation}
         onRequestFreshStockForRecommendation={(itemId) =>

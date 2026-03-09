@@ -103,6 +103,8 @@ export function addItemHandler(context) {
   const previousHealthyCount = asSafeNonNegative(inventoryRecord?.healthyCount, 0)
   const previousExpiringSoonCount = asSafeNonNegative(inventoryRecord?.expiringSoonCount, 0)
   const previousExpiredCount = asSafeNonNegative(inventoryRecord?.expiredCount, 0)
+  const previousTotalCount = previousHealthyCount + previousExpiringSoonCount + previousExpiredCount
+  const hadAnyStockBeforeAdd = previousTotalCount > 0
 
   const nextHealthyCount = previousHealthyCount + quantity
   const nextExpiringSoonCount = expiringSoonCount ?? previousExpiringSoonCount
@@ -124,7 +126,12 @@ export function addItemHandler(context) {
       typeof context.payload.lowStockThreshold === "number"
         ? lowStockThreshold
         : inventoryRecord?.lowStockThreshold ?? lowStockThreshold,
-    lastStockedAt: quantity > 0 ? timestamp : inventoryRecord?.lastStockedAt ?? null,
+    lastStockedAt:
+      quantity > 0
+        ? hadAnyStockBeforeAdd
+          ? inventoryRecord?.lastStockedAt ?? null
+          : timestamp
+        : inventoryRecord?.lastStockedAt ?? null,
     updatedAt: timestamp,
     source: inventoryRecord?.source ?? source,
   }

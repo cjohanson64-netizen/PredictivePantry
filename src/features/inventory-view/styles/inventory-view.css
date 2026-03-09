@@ -40,7 +40,6 @@
 .recommendations-panel,
 .shopping-list-panel {
   padding: 16px;
-  overflow: auto;
   min-width: 0;
   min-height: 0;
   border: 1px solid var(--color-panel-border);
@@ -96,16 +95,27 @@
 
 .inventory-panel {
   grid-area: inventory;
+  overflow: auto;
 }
 
 .recommendations-panel {
   grid-area: recommendations;
   align-self: start;
-  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  max-height: 420px;
+  overflow: hidden;
 }
 
 .shopping-list-panel {
   grid-area: shopping;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  max-height: 420px;
+  overflow: hidden;
 }
 
 .inventory-table {
@@ -605,6 +615,10 @@ td.inventory-col-healthy {
   padding-top: 10px;
   display: grid;
   gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .recommendations-panel-copy-feedback {
@@ -616,6 +630,11 @@ td.inventory-col-healthy {
 .recommendations-panel-lines {
   display: grid;
   gap: 6px;
+}
+
+.recommendations-panel-title {
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 .recommendations-panel-line {
@@ -702,10 +721,31 @@ td.inventory-col-healthy {
   margin-bottom: 10px;
 }
 
+.shopping-list-panel-header {
+  margin-bottom: 8px;
+}
+
+.shopping-list-panel-content {
+  border-top: 1px solid var(--color-panel-border);
+  padding-top: 10px;
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .shopping-list-groups {
   display: grid;
   gap: 10px;
   margin-bottom: 10px;
+}
+
+.recommendations-panel-content .panel-debug-json,
+.shopping-list-panel-content .panel-debug-json {
+  max-height: none;
+  overflow: visible;
 }
 
 .shopping-list-group {

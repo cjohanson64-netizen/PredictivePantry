@@ -3528,8 +3528,221 @@ export const tatScenarioDefinitions = [
     expectations: [{ type: "analysisStatusEquals", itemId: "item:ham", status: "expired" }],
   },
   {
-    name: "add-item-refreshes-lastStockedAt",
-    description: "Adding stock refreshes inventory.lastStockedAt to mutation timestamp.",
+    name: "app-load-refresh-recomputes-expiration",
+    description:
+      "Refresh pipeline recomputes analysis and recommendations from elapsed time without requiring pantry mutation.",
+    seedMode: true,
+    seedState: createScenarioSeedState({
+      itemRecords: [createSeedItem({ id: "item:yogurt", name: "Yogurt", category: "Dairy", shelfLifeDays: 2 })],
+      inventoryRecords: [
+        createSeedInventoryRecord({
+          itemId: "item:yogurt",
+          healthyCount: 1,
+          lowStockThreshold: 0,
+          lastStockedAt: "2026-03-09T00:00:00.000Z",
+        }),
+      ],
+      itemAnalysisRecords: [
+        createSeedItemAnalysisRecord({
+          itemId: "item:yogurt",
+          status: "healthy",
+        }),
+      ],
+      recommendationRecords: [
+        createSeedRecommendationRecord({
+          itemId: "item:yogurt",
+          recommendation: "none",
+          sourceStatus: "healthy",
+          priority: 0,
+        }),
+      ],
+      seedMode: true,
+      seedScenario: "app-load-refresh-recomputes-expiration-seed",
+    }),
+    initialProgram: "pantry.pantryRoot",
+    now: "2026-03-10T00:00:00.000Z",
+    steps: [
+      {
+        featureName: "pantry",
+        programName: "analyzeInventory",
+        actionName: "ANALYZE_INVENTORY",
+        payload: {},
+        meta: { scenario: "app-load-refresh-recomputes-expiration" },
+      },
+      {
+        featureName: "pantry",
+        programName: "recommendPantryActions",
+        actionName: "RECOMMEND_PANTRY_ACTIONS",
+        payload: {},
+        meta: { scenario: "app-load-refresh-recomputes-expiration" },
+      },
+      {
+        featureName: "pantry",
+        programName: "rankPantryPriorities",
+        actionName: "RANK_PANTRY_PRIORITIES",
+        payload: {},
+        meta: { scenario: "app-load-refresh-recomputes-expiration" },
+      },
+      {
+        featureName: "pantry",
+        programName: "generateShoppingList",
+        actionName: "GENERATE_SHOPPING_LIST",
+        payload: {},
+        meta: { scenario: "app-load-refresh-recomputes-expiration" },
+      },
+    ],
+    expectations: [
+      { type: "analysisStatusEquals", itemId: "item:yogurt", status: "expiring-soon" },
+      { type: "recommendationEquals", itemId: "item:yogurt", recommendation: "use-soon" },
+      { type: "eventTypeSeen", eventType: "INVENTORY_ANALYZED" },
+      { type: "eventTypeSeen", eventType: "SHOPPING_LIST_GENERATED" },
+    ],
+  },
+  {
+    name: "hourly-refresh-recomputes-expiration",
+    description:
+      "Running the refresh pipeline again after elapsed wall-clock time updates status/recommendations without mutation.",
+    seedMode: true,
+    seedState: createScenarioSeedState({
+      itemRecords: [createSeedItem({ id: "item:kefir", name: "Kefir", category: "Dairy", shelfLifeDays: 2 })],
+      inventoryRecords: [
+        createSeedInventoryRecord({
+          itemId: "item:kefir",
+          healthyCount: 1,
+          lowStockThreshold: 0,
+          lastStockedAt: "2026-03-09T00:00:00.000Z",
+        }),
+      ],
+      seedMode: true,
+      seedScenario: "hourly-refresh-recomputes-expiration-seed",
+    }),
+    initialProgram: "pantry.pantryRoot",
+    steps: [
+      {
+        featureName: "pantry",
+        programName: "analyzeInventory",
+        actionName: "ANALYZE_INVENTORY",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-10T00:00:00.000Z" },
+      },
+      {
+        featureName: "pantry",
+        programName: "recommendPantryActions",
+        actionName: "RECOMMEND_PANTRY_ACTIONS",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-10T00:00:00.000Z" },
+      },
+      {
+        featureName: "pantry",
+        programName: "rankPantryPriorities",
+        actionName: "RANK_PANTRY_PRIORITIES",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-10T00:00:00.000Z" },
+      },
+      {
+        featureName: "pantry",
+        programName: "generateShoppingList",
+        actionName: "GENERATE_SHOPPING_LIST",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-10T00:00:00.000Z" },
+      },
+      {
+        featureName: "pantry",
+        programName: "analyzeInventory",
+        actionName: "ANALYZE_INVENTORY",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-11T00:00:00.000Z" },
+      },
+      {
+        featureName: "pantry",
+        programName: "recommendPantryActions",
+        actionName: "RECOMMEND_PANTRY_ACTIONS",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-11T00:00:00.000Z" },
+      },
+      {
+        featureName: "pantry",
+        programName: "rankPantryPriorities",
+        actionName: "RANK_PANTRY_PRIORITIES",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-11T00:00:00.000Z" },
+      },
+      {
+        featureName: "pantry",
+        programName: "generateShoppingList",
+        actionName: "GENERATE_SHOPPING_LIST",
+        payload: {},
+        meta: { scenario: "hourly-refresh-recomputes-expiration", now: "2026-03-11T00:00:00.000Z" },
+      },
+    ],
+    expectations: [
+      { type: "analysisStatusEquals", itemId: "item:kefir", status: "expired" },
+      { type: "recommendationEquals", itemId: "item:kefir", recommendation: "check-item" },
+      { type: "eventTypeSeen", eventType: "INVENTORY_ANALYZED" },
+      { type: "eventTypeSeen", eventType: "PANTRY_RECOMMENDATIONS_GENERATED" },
+    ],
+  },
+  {
+    name: "shelf-life-2-flags-expiring-soon-on-day-1",
+    description: "Shelf life of 2 days becomes expiring-soon at day 1.",
+    seedMode: true,
+    seedState: createScenarioSeedState({
+      itemRecords: [createSeedItem({ id: "item:berries", name: "Berries", category: "Produce", shelfLifeDays: 2 })],
+      inventoryRecords: [
+        createSeedInventoryRecord({
+          itemId: "item:berries",
+          healthyCount: 1,
+          lastStockedAt: "2026-03-09T00:00:00.000Z",
+        }),
+      ],
+      seedMode: true,
+      seedScenario: "shelf-life-2-flags-expiring-soon-on-day-1-seed",
+    }),
+    initialProgram: "pantry.inventoryRoot",
+    now: "2026-03-10T00:00:00.000Z",
+    steps: [
+      {
+        featureName: "pantry",
+        programName: "analyzeInventory",
+        actionName: "ANALYZE_INVENTORY",
+        payload: {},
+        meta: { scenario: "shelf-life-2-flags-expiring-soon-on-day-1" },
+      },
+    ],
+    expectations: [{ type: "analysisStatusEquals", itemId: "item:berries", status: "expiring-soon" }],
+  },
+  {
+    name: "shelf-life-2-flags-expired-on-day-2",
+    description: "Shelf life of 2 days becomes expired at day 2.",
+    seedMode: true,
+    seedState: createScenarioSeedState({
+      itemRecords: [createSeedItem({ id: "item:spinach", name: "Spinach", category: "Produce", shelfLifeDays: 2 })],
+      inventoryRecords: [
+        createSeedInventoryRecord({
+          itemId: "item:spinach",
+          healthyCount: 1,
+          lastStockedAt: "2026-03-09T00:00:00.000Z",
+        }),
+      ],
+      seedMode: true,
+      seedScenario: "shelf-life-2-flags-expired-on-day-2-seed",
+    }),
+    initialProgram: "pantry.inventoryRoot",
+    now: "2026-03-11T00:00:00.000Z",
+    steps: [
+      {
+        featureName: "pantry",
+        programName: "analyzeInventory",
+        actionName: "ANALYZE_INVENTORY",
+        payload: {},
+        meta: { scenario: "shelf-life-2-flags-expired-on-day-2" },
+      },
+    ],
+    expectations: [{ type: "analysisStatusEquals", itemId: "item:spinach", status: "expired" }],
+  },
+  {
+    name: "add-stock-does-not-reset-aged-item-when-stock-already-exists",
+    description: "Adding stock to existing grouped inventory preserves lastStockedAt age signal.",
     seedMode: true,
     seedState: createScenarioSeedState({
       itemRecords: [createSeedItem({ id: "item:beans", name: "Beans", category: "Pantry", shelfLifeDays: 180 })],
@@ -3543,7 +3756,7 @@ export const tatScenarioDefinitions = [
       ],
       inventoryHistoryRecords: [createSeedInventoryHistoryRecord({ itemId: "item:beans", consumedCount: 0 })],
       seedMode: true,
-      seedScenario: "add-item-refreshes-lastStockedAt-seed",
+      seedScenario: "add-stock-does-not-reset-aged-item-when-stock-already-exists-seed",
     }),
     initialProgram: "pantry.inventoryRoot",
     steps: [
@@ -3552,7 +3765,10 @@ export const tatScenarioDefinitions = [
         programName: "addItem",
         actionName: "ADD_ITEM",
         payload: { itemId: "item:beans", quantity: 1, source: { kind: "user", label: "scenario" } },
-        meta: { scenario: "add-item-refreshes-lastStockedAt", now: "2026-03-11T00:00:00.000Z" },
+        meta: {
+          scenario: "add-stock-does-not-reset-aged-item-when-stock-already-exists",
+          now: "2026-03-11T00:00:00.000Z",
+        },
       },
     ],
     expectations: [
@@ -3560,7 +3776,7 @@ export const tatScenarioDefinitions = [
         type: "inventoryFieldEquals",
         itemId: "item:beans",
         field: "lastStockedAt",
-        value: "2026-03-11T00:00:00.000Z",
+        value: "2026-03-01T00:00:00.000Z",
       },
       { type: "eventTypeSeen", eventType: "ITEM_ANALYZED" },
       { type: "eventTypeSeen", eventType: "PANTRY_RECOMMENDATIONS_GENERATED" },
@@ -4222,19 +4438,13 @@ export const tatScenarioDefinitions = [
     ],
   },
   {
-    name: "fresh-inventory-modal-refreshes-lastStockedAt",
-    description: "Fresh stock intake updates lastStockedAt to now.",
+    name: "add-stock-sets-lastStockedAt-when-item-was-empty",
+    description: "Adding stock sets lastStockedAt when grouped inventory had zero stock before add.",
     seedMode: true,
     seedState: createScenarioSeedState({
       itemRecords: [createSeedItem({ id: "item:bread", name: "Bread", category: "Bakery", shelfLifeDays: 6 })],
-      inventoryRecords: [
-        createSeedInventoryRecord({
-          itemId: "item:bread",
-          healthyCount: 1,
-          lastStockedAt: "2026-03-01T00:00:00.000Z",
-        }),
-      ],
-      seedScenario: "fresh-inventory-modal-refreshes-lastStockedAt-seed",
+      inventoryRecords: [createSeedInventoryRecord({ itemId: "item:bread", healthyCount: 0, lastStockedAt: null })],
+      seedScenario: "add-stock-sets-lastStockedAt-when-item-was-empty-seed",
     }),
     initialProgram: "pantry.inventoryRoot",
     steps: [
@@ -4246,7 +4456,7 @@ export const tatScenarioDefinitions = [
           itemId: "item:bread",
           quantity: 2,
         },
-        meta: { scenario: "fresh-inventory-modal-refreshes-lastStockedAt", now: "2026-03-09T14:30:00.000Z" },
+        meta: { scenario: "add-stock-sets-lastStockedAt-when-item-was-empty", now: "2026-03-09T14:30:00.000Z" },
       },
     ],
     expectations: [
@@ -4260,7 +4470,8 @@ export const tatScenarioDefinitions = [
   },
   {
     name: "restock-bought-uses-fresh-inventory-flow",
-    description: "Restock bought resolution applies fresh-stock semantics (healthy increment + stocked-at refresh).",
+    description:
+      "Restock bought resolution increases healthy stock while preserving grouped age signal when stock already existed.",
     seedMode: true,
     seedState: createScenarioSeedState({
       itemRecords: [createSeedItem({ id: "item:oats", name: "Oats", category: "Pantry", shelfLifeDays: 180 })],
@@ -4304,12 +4515,7 @@ export const tatScenarioDefinitions = [
       { type: "inventoryFieldEquals", itemId: "item:oats", field: "healthyCount", value: 3 },
       { type: "inventoryFieldEquals", itemId: "item:oats", field: "expiringSoonCount", value: 2 },
       { type: "inventoryFieldEquals", itemId: "item:oats", field: "expiredCount", value: 1 },
-      {
-        type: "inventoryFieldEquals",
-        itemId: "item:oats",
-        field: "lastStockedAt",
-        value: "2026-03-10T09:15:00.000Z",
-      },
+      { type: "inventoryFieldEquals", itemId: "item:oats", field: "lastStockedAt", value: "2026-03-01T00:00:00.000Z" },
       { type: "eventTypeSeen", eventType: "RECOMMENDATION_RESOLVED" },
     ],
   },

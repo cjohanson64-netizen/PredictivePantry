@@ -37,7 +37,10 @@ export function inferExpirationSignals({
   }
 
   const elapsedDays = Math.max(0, (nowMs - parsedLastStockedAt) / (24 * 60 * 60 * 1000))
-  const thresholdExpiringSoon = safeShelfLifeDays * 0.8
+  const thresholdExpiringSoon =
+    safeShelfLifeDays <= 2
+      ? Math.max(1, safeShelfLifeDays - 1)
+      : safeShelfLifeDays * 0.8
 
   return {
     hasInference: true,
